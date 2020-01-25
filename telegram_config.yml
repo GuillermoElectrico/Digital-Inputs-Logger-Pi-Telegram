@@ -1,7 +1,3 @@
-influxdb:
-    - name : Local InfluxDB 
-      host : 'localhost'
-      port : 8086
-      user : 'root'
-      password : 'root'
-      dbname : 'db_inputs'
+telegramBot:  
+    - token : ''       #token that can be generated talking with @BotFather on telegram
+      chat_id : ''     #Send a mensage to a telegram user specified on chatId, chat_id must be a number! Use @userinfobot to obtain yout userID from a private conversation

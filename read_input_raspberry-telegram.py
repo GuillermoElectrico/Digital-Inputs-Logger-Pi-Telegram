@@ -9,19 +9,29 @@ import time
 import yaml
 import logging
 import subprocess
+import telegram       # to install "pip3 install python-telegram-bot"
 GPIO.setmode(GPIO.BOARD)
+
+##############################################################################################################################################
+
+#token that can be generated talking with @BotFather on telegram
+token = ""
+bot = telegram.Bot(token=token)
+
+"""
+Send a mensage to a telegram user specified on chatId
+chat_id must be a number! 
+use @userinfobot to obtain yout userID from a private conversation
+"""
+chat_id=""
+
+##############################################################################################################################################
 
 # Change working dir to the same dir as this script
 os.chdir(sys.path[0])
 
 class DataCollector:
     def __init__(self, influx_yaml, inputspins_yaml):
-        self.influx_yaml = influx_yaml
-        self.influx_map = None
-        self.influx_map_last_change = -1
-        log.info('InfluxDB:')
-        for influx_config in sorted(self.get_influxdb(), key=lambda x:sorted(x.keys())):
-            log.info('\t {} <--> {}'.format(influx_config['host'], influx_config['name']))
         self.inputspins_yaml = inputspins_yaml
         self.max_iterations = None  # run indefinitely by default
         self.inputspins = None
@@ -31,8 +41,8 @@ class DataCollector:
 #        GPIO.setup(gpioinputs, GPIO.IN)
         log.info('Configure GPIO:')
         for gpio in gpioinputs:
-            log.info('\t {} - PIN {}'.format( gpio, gpioinputs[gpio]))
-            GPIO.setup(gpioinputs[gpio], GPIO.IN)
+            log.info('\t {} - PIN {}'.format( gpio, gpioinputs[gpio['pin']]))
+            GPIO.setup(gpioinputs[gpio['pin']], GPIO.IN)
 
     def get_inputs(self):
         assert path.exists(self.inputspins_yaml), 'Inputs not found: %s' % self.inputspins_yaml
@@ -40,94 +50,39 @@ class DataCollector:
             try:
                 log.info('Reloading inputs as file changed')
                 self.inputspins = yaml.load(open(self.inputspins_yaml), Loader=yaml.FullLoader)
-#                self.meter_map = new_map['inputs']
+                self.meter_map = new_map['inputs']
                 self.inputspins_map_last_change = path.getmtime(self.inputspins_yaml)
             except Exception as e:
                 log.warning('Failed to re-load inputs, going on with the old one.')
                 log.warning(e)
         return self.inputspins
 
-    def get_influxdb(self):
-        assert path.exists(self.influx_yaml), 'InfluxDB map not found: %s' % self.influx_yaml
-        if path.getmtime(self.influx_yaml) != self.influx_map_last_change:
-            try:
-                log.info('Reloading influxDB map as file changed')
-                new_map = yaml.load(open(self.influx_yaml), Loader=yaml.FullLoader)
-                self.influx_map = new_map['influxdb']
-                self.influx_map_last_change = path.getmtime(self.influx_yaml)
-            except Exception as e:
-                log.warning('Failed to re-load influxDB map, going on with the old one.')
-                log.warning(e)
-        return self.influx_map
-
     def collect_and_store(self):
         inputs = self.get_inputs()
-        influxdb = self.get_influxdb()
-        t_utc = datetime.utcnow()
-        t_str = t_utc.isoformat() + 'Z'
 
-        send = False
         datas = dict()
         list = 0
         for parameter in inputs:
             list = list + 1
-            datas[parameter] = False
-
-        start_time = time.time()
+            if inputs[parameter['normally']] == 0 :
+                datas[parameter] = False
+            else :
+                datas[parameter] = True
 
 		## inicio while :
         while True:
             list = 0
             for parameter in inputs:
                 list = list + 1
-                statusInput =  not GPIO.input(inputs[parameter])
+                statusInput =  not GPIO.input(inputs[parameter['pin']])
                 if statusInput != datas[parameter]:
                     datas[parameter] = statusInput
-                    log.info('{} - PIN {} - Status {}'.format( parameter, inputs[parameter], int(statusInput)))
-                    send = True
-
-            if send:
-                send = False
-                t_utc = datetime.utcnow()
-                t_str = t_utc.isoformat() + 'Z'
-                json_body = [
-                    {
-                        'measurement': 'LocalInputsLog',
-                        'tags': {
-                            'id': inputs_id,
-                        },
-                        'time': t_str,
-                        'fields': {
-                            'status': int(datas[inputs_id]),
-                        }
-                    }
-                    for inputs_id in datas
-                ]
-                if len(json_body) > 0:
-                    influx_id_name = dict() # mapping host to name
-
-#                    log.debug(json_body)
-
-                    for influx_config in influxdb:
-                        influx_id_name[influx_config['host']] = influx_config['name']
-
-                        DBclient = InfluxDBClient(influx_config['host'],
-                                                influx_config['port'],
-                                                influx_config['user'],
-                                                influx_config['password'],
-                                                influx_config['dbname'])
-                        try:
-                            DBclient.write_points(json_body)
-                            log.info(t_str + ' Data written for %d inputs in {}.' .format(influx_config['name']) % len(json_body) )
-                        except Exception as e:
-                            log.error('Data not written! in {}' .format(influx_config['name']))
-                            log.error(e)
-                            raise
-                else:
-                    log.warning(t_str, 'No data sent.')
-
-                start_time = time.time()
-
+                    log.info('{} - PIN {} - Status {}'.format( parameter, inputs[parameter['pin']], int(statusInput)))
+                    if statusInput == False :
+                        bot.sendMessage(chat_id=chat_id, text=inputs[parameter['message0']])
+                    else :
+                        bot.sendMessage(chat_id=chat_id, text=inputs[parameter['message1']])
+ 
 			## delay 200 ms between read inputs
             time.sleep(0.2)
 
@@ -140,14 +95,11 @@ if __name__ == '__main__':
 
     parser.add_argument('--inputspinsmessage', default='inputs_pins_message.yml',
                         help='YAML file containing relation inputs, name, type etc. Default "inputs_pins_message.yml"')
-    parser.add_argument('--influxdb', default='telegram_config.yml',
-                        help='YAML file containing Influx Host, port, user etc. Default "telegram_config.yml"')
     parser.add_argument('--log', default='CRITICAL',
                         help='Log levels, DEBUG, INFO, WARNING, ERROR or CRITICAL')
     parser.add_argument('--logfile', default='',
                         help='Specify log file, if not specified the log is streamed to console')
     args = parser.parse_args()
-    interval = int(args.interval)
     loglevel = args.log.upper()
     logfile = args.logfile
 
@@ -164,9 +116,9 @@ if __name__ == '__main__':
 
     log.addHandler(loghandle)
 
-    log.info('Sleep {} seconds for booting' .format( interval ))
+    log.info('Sleep 60 seconds for booting')
 
-    time.sleep( interval )
+    time.sleep(60)
 
     log.info('Started app')
 

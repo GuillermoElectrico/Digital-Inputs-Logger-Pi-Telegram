@@ -1,19 +1,65 @@
-influxdb:
-    - name : Local InfluxDB 
 Input 1 : 
     - pin : 7 #GPIO4
       normally : 0 # 0 = normally open, 1 = normally close
       message0 : 'Down Input 1'
       message1 : 'Up Input 1'
-Input 2 : 11 #GPIO17
-Input 3 : 13 #GPIO27
-Input 4 : 15 #GPIO22
-Input 5 : 16 #GPIO23
-Input 6 : 18 #GPIO24
-Input 7 : 22 #GPIO25
-Input 8 : 29 #GPIO5
-Input 9 : 32 #GPIO12
-Input 10 : 31 #GPIO6
-Input 11 : 38 #GPIO20
-Input 12 : 37 #GPIO26
-Input 13 : 40 #GPIO21
+Input 2 : 
+    - pin : 11 #GPIO17
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 2'
+      message1 : 'Up Input 2'
+Input 3 : 
+    - pin : 13 #GPIO27
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 3'
+      message1 : 'Up Input 3'
+Input 4 : 
+    - pin : 15 #GPIO22
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 4'
+      message1 : 'Up Input 4'
+Input 5 : 
+    - pin : 16 #GPIO23
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 5'
+      message1 : 'Up Input 5'
+Input 6 : 
+    - pin : 18 #GPIO24
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 6'
+      message1 : 'Up Input 6'
+Input 7 : 
+    - pin : 22 #GPIO25
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 7'
+      message1 : 'Up Input 7'
+Input 8 : 
+    - pin : 29 #GPIO5
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 8'
+      message1 : 'Up Input 8'
+Input 9 : 
+    - pin : 32 #GPIO12
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 9'
+      message1 : 'Up Input 9'
+Input 10 : 
+    - pin : 31 #GPIO6
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 10'
+      message1 : 'Up Input 10'
+Input 11 : 
+    - pin : 38 #GPIO20
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 11'
+      message1 : 'Up Input 11'
+Input 12 : 
+    - pin : 37 #GPIO26
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 12'
+      message1 : 'Up Input 12'
+Input 13 : 
+    - pin : 40 #GPIO21
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 13'
+      message1 : 'Up Input 13'
