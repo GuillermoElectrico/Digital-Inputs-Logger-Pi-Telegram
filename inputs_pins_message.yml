@@ -1,4 +1,10 @@
-Input 1 : 7 #GPIO4
+influxdb:
+    - name : Local InfluxDB 
+Input 1 : 
+    - pin : 7 #GPIO4
+      normally : 0 # 0 = normally open, 1 = normally close
+      message0 : 'Down Input 1'
+      message1 : 'Up Input 1'
 Input 2 : 11 #GPIO17
 Input 3 : 13 #GPIO27
 Input 4 : 15 #GPIO22
