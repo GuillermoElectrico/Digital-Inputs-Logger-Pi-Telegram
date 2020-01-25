@@ -31,7 +31,7 @@ chat_id=""
 os.chdir(sys.path[0])
 
 class DataCollector:
-    def __init__(self, influx_yaml, inputspins_yaml):
+    def __init__(self, inputspins_yaml):
         self.inputspins_yaml = inputspins_yaml
         self.max_iterations = None  # run indefinitely by default
         self.inputspins = None
@@ -41,16 +41,16 @@ class DataCollector:
 #        GPIO.setup(gpioinputs, GPIO.IN)
         log.info('Configure GPIO:')
         for gpio in gpioinputs:
-            log.info('\t {} - PIN {}'.format( gpio, gpioinputs[gpio['pin']]))
-            GPIO.setup(gpioinputs[gpio['pin']], GPIO.IN)
+            log.info('\t {} - PIN {}'.format( gpio['name'], gpio['pin']))
+            GPIO.setup(gpio['pin'], GPIO.IN)
 
     def get_inputs(self):
         assert path.exists(self.inputspins_yaml), 'Inputs not found: %s' % self.inputspins_yaml
         if path.getmtime(self.inputspins_yaml) != self.inputspins_map_last_change:
             try:
                 log.info('Reloading inputs as file changed')
-                self.inputspins = yaml.load(open(self.inputspins_yaml), Loader=yaml.FullLoader)
-                self.meter_map = new_map['inputs']
+                new_map = yaml.load(open(self.inputspins_yaml), Loader=yaml.FullLoader)
+                self.inputspins  = new_map['inputs']
                 self.inputspins_map_last_change = path.getmtime(self.inputspins_yaml)
             except Exception as e:
                 log.warning('Failed to re-load inputs, going on with the old one.')
@@ -64,24 +64,24 @@ class DataCollector:
         list = 0
         for parameter in inputs:
             list = list + 1
-            if inputs[parameter['normally']] == 0 :
-                datas[parameter] = False
+            if parameter['normally'] == 0 :
+                datas[parameter['name']] = True
             else :
-                datas[parameter] = True
+                datas[parameter['name']] = False
 
 		## inicio while :
         while True:
             list = 0
             for parameter in inputs:
                 list = list + 1
-                statusInput =  not GPIO.input(inputs[parameter['pin']])
-                if statusInput != datas[parameter]:
-                    datas[parameter] = statusInput
-                    log.info('{} - PIN {} - Status {}'.format( parameter, inputs[parameter['pin']], int(statusInput)))
+                statusInput =  not GPIO.input(parameter['pin'])
+                if statusInput != datas[parameter['name']]:
+                    datas[parameter['name']] = statusInput
+                    log.info('{} - PIN {} - Status {}'.format( parameter['name'], parameter['pin'], int(statusInput)))
                     if statusInput == False :
-                        bot.sendMessage(chat_id=chat_id, text=inputs[parameter['message0']])
+                        bot.sendMessage(chat_id=chat_id, text=parameter['message0'])
                     else :
-                        bot.sendMessage(chat_id=chat_id, text=inputs[parameter['message1']])
+                        bot.sendMessage(chat_id=chat_id, text=parameter['message1'])
  
 			## delay 200 ms between read inputs
             time.sleep(0.2)
@@ -122,8 +122,7 @@ if __name__ == '__main__':
 
     log.info('Started app')
 
-    collector = DataCollector(influx_yaml=args.influxdb,
-                              inputspins_yaml=args.inputspinsmessage)
+    collector = DataCollector(inputspins_yaml=args.inputspinsmessage)
 
     collector.collect_and_store()
 
