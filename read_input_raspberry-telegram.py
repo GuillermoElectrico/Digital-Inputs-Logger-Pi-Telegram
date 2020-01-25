@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from influxdb import InfluxDBClient
 from datetime import datetime, timedelta
 from os import path
 import RPi.GPIO as GPIO # to install "pip3 install --upgrade RPi.GPIO"
@@ -16,8 +15,7 @@ GPIO.setmode(GPIO.BOARD)
 os.chdir(sys.path[0])
 
 class DataCollector:
-    def __init__(self, influx_yaml, inputspins_yaml, interval_save):
-        self.interval = interval_save
+    def __init__(self, influx_yaml, inputspins_yaml):
         self.influx_yaml = influx_yaml
         self.influx_map = None
         self.influx_map_last_change = -1
@@ -68,7 +66,7 @@ class DataCollector:
         t_utc = datetime.utcnow()
         t_str = t_utc.isoformat() + 'Z'
 
-        save = False
+        send = False
         datas = dict()
         list = 0
         for parameter in inputs:
@@ -86,16 +84,10 @@ class DataCollector:
                 if statusInput != datas[parameter]:
                     datas[parameter] = statusInput
                     log.info('{} - PIN {} - Status {}'.format( parameter, inputs[parameter], int(statusInput)))
-                    save = True
+                    send = True
 
-#            datas['ReadTime'] =  time.time() - start_time
-            if time.time() - start_time > self.interval:
-                log.info('Save with interval')
-                save = True
-                start_time = time.time()
-
-            if save:
-                save = False
+            if send:
+                send = False
                 t_utc = datetime.utcnow()
                 t_str = t_utc.isoformat() + 'Z'
                 json_body = [
@@ -145,12 +137,11 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--interval', default=60,
-                        help='Saved inputs interval (seconds), default 60')
-    parser.add_argument('--inputspins', default='inputspins.yml',
-                        help='YAML file containing relation inputs, name, type etc. Default "inputspins.yml"')
-    parser.add_argument('--influxdb', default='influx_config.yml',
-                        help='YAML file containing Influx Host, port, user etc. Default "influx_config.yml"')
+
+    parser.add_argument('--inputspinsmessage', default='inputs_pins_message.yml',
+                        help='YAML file containing relation inputs, name, type etc. Default "inputs_pins_message.yml"')
+    parser.add_argument('--influxdb', default='telegram_config.yml',
+                        help='YAML file containing Influx Host, port, user etc. Default "telegram_config.yml"')
     parser.add_argument('--log', default='CRITICAL',
                         help='Log levels, DEBUG, INFO, WARNING, ERROR or CRITICAL')
     parser.add_argument('--logfile', default='',
@@ -180,7 +171,7 @@ if __name__ == '__main__':
     log.info('Started app')
 
     collector = DataCollector(influx_yaml=args.influxdb,
-                              inputspins_yaml=args.inputspins, interval_save=interval)
+                              inputspins_yaml=args.inputspinsmessage)
 
     collector.collect_and_store()
 
