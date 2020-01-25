@@ -34,7 +34,7 @@ Its been verified to work with a raspberry pi with simple 13 inputs module (Incl
     ```sh
     $ chmod 777 read_input_raspberry.py
     ```
-* Edit inputs.yml to match your configuration and influx_config.yml
+* Edit inputs_pins_message.yml to match your configuration and read_input_raspberry-telegram.py to add bot token and chat_id
 * Test the configuration by running:
     ```sh
     ./read_input_raspberry-telegram.py
