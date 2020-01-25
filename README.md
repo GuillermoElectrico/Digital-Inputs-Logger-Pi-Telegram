@@ -1,4 +1,4 @@
-# Digital-Inputs-Logger-Pi
+# Digital-Inputs-Logger-Pi-Telegram
 Log inputs status on a Raspberry Pi and if change value send mesagge to telegram.
 Its been verified to work with a raspberry pi with simple 13 inputs module (Included in PCB folder). By changing the inputs_pins_message.yml file and making a corresponding GPIO inputs relation.
 
