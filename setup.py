@@ -28,7 +28,7 @@ setup(name='modbus_logger',
         'Programming Language :: Python :: 3.5'
       ],
       keywords='Digital Inputs Logger Pi',
-      install_requires=[]+(['setuptools', 'pyyaml', 'ez_setup', 'RPi.GPIO'] if "linux" in sys.platform else []),
+      install_requires=[]+(['setuptools', 'pyyaml', 'ez_setup', 'RPi.GPIO', 'python-telegram-bot'] if "linux" in sys.platform else []),
       license='MIT',
       packages=[],
       include_package_data=True,
