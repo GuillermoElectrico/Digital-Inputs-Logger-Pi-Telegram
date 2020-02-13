@@ -83,8 +83,8 @@ class DataCollector:
                     else :
                         bot.sendMessage(chat_id=chat_id, text=parameter['message1'])
  
-			## delay 200 ms between read inputs
-            time.sleep(0.2)
+			## delay 1s between read inputs
+            time.sleep(1)
 
 
 if __name__ == '__main__':
