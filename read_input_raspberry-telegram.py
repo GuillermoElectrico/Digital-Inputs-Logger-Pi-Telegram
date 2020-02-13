@@ -74,14 +74,19 @@ class DataCollector:
             list = 0
             for parameter in inputs:
                 list = list + 1
-                statusInput =  not GPIO.input(parameter['pin'])
-                if statusInput != datas[parameter['name']]:
-                    datas[parameter['name']] = statusInput
-                    log.info('{} - PIN {} - Status {}'.format( parameter['name'], parameter['pin'], int(statusInput)))
-                    if statusInput == False :
-                        bot.sendMessage(chat_id=chat_id, text=parameter['message0'])
-                    else :
-                        bot.sendMessage(chat_id=chat_id, text=parameter['message1'])
+                try:
+                    statusInput =  not GPIO.input(parameter['pin'])
+                    if statusInput != datas[parameter['name']]:
+                        datas[parameter['name']] = statusInput
+                        log.info('{} - PIN {} - Status {}'.format( parameter['name'], parameter['pin'], int(statusInput)))
+                        if statusInput == False :
+                            bot.sendMessage(chat_id=chat_id, text=parameter['message0'])
+                        else :
+                            bot.sendMessage(chat_id=chat_id, text=parameter['message1'])
+                except Exception as e:
+                    log.error('Error to read input!')
+                    log.error(e)
+                    raise
  
 			## delay 1s between read inputs
             time.sleep(1)
