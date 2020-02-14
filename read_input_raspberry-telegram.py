@@ -87,6 +87,7 @@ class DataCollector:
                     log.error('Error to read input!')
                     log.error(e)
                     raise
+                time.sleep(0.01)
  
 			## delay 1s between read inputs
             time.sleep(1)
